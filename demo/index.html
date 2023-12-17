@@ -4,7 +4,40 @@
   <meta charset="UTF-8">
   <title>Happy New Year!!!</title>
   <link rel="stylesheet" href="./style.css">
+<style>
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 50px;
+      border: 5px solid #333;
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: rotate 1s infinite linear;
+    }
+    @keyframes rotate {
+      0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+      100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    (document).ready(function() {
+      // 在页面加载开始时显示加载动画元素(window).on('loadstart', function() {
+        ('.loading').show();
+      });
 
+      // 在页面加载完成后隐藏加载动画元素(window).on('load', function() {
+        $('.loading').hide();
+      });
+    });
+  </script>
 </head>
 <body>
 <!-- partial:index.partial.html -->
