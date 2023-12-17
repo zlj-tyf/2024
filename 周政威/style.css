@@ -93,7 +93,7 @@ body {
 	color: #f7798c;
 	font-weight: bold;
 	max-width: 250px;
-	line-break: anywhere;
+	line-break: auto;
 }
 
 .building {
