@@ -3,7 +3,7 @@
 *,
 *:before,
 *:after {
-	font-family: "Consolas", "微软雅黑";
+	font-family: "Consolas";
 	position: relative;
 }
 
@@ -93,7 +93,7 @@ body {
 	color: #f7798c;
 	font-weight: bold;
 	max-width: 250px;
-	line-break: anywhere;
+	line-break: auto;
 }
 
 .building {
