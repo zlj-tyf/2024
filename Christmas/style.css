@@ -1,0 +1,63 @@
+body {
+  text-align: center;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+svg {
+  height: 100vh;
+  width: 100%;
+  visibility: hidden;
+}
+#snow_bottom,
+#left_arm,
+#right_arm,
+#scarf,
+#ears,
+#moon,
+#nose {
+  opacity: 0;
+}
+g#snow > circle,
+g#snow > ellipse,
+g#snow2 > circle,
+g#snow2 > ellipse,
+g#snow3 > circle,
+g#snow3 > ellipse {
+  opacity: 0;
+}
+g#stars > polygon,
+g#snowman > path,
+g#snowman > polygon,
+g#snowman > circle,
+g#snowman > ellipse {
+  opacity: 0;
+}
+#bottom_buttons > circle {
+  opacity: 0;
+}
+#face > circle,
+#face > ellipse {
+  opacity: 0;
+}
+g#TreeGroup1 > path,
+g#TreeGroup1 > polygon,
+g#TreeGroup1 > g > path,
+g#TreeGroup1 > g > polygon {
+  opacity: 0;
+}
+g#TreeGroup2 > path,
+g#TreeGroup2 > polygon {
+  opacity: 0;
+}
+g#text > path,
+g#text > g > path {
+  opacity: 0;
+}
+g#year > path {
+  opacity: 0;
+}
+g#T > path {
+  opacity: 0;
+}
