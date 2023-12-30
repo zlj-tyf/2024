@@ -1,145 +1,180 @@
-$(function() {
-	var canvas = $('#canvas')[0];
-	canvas.width = $(window).width();
-	canvas.height = $(window).height();
-	var ctx = canvas.getContext('2d');
-	
-	// resize
-	$(window).on('resize', function() {
-		canvas.width = $(window).width();
-		canvas.height = $(window).height();
-		ctx.fillStyle = '#000';
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-	});
 
-	// init
-	ctx.fillStyle = '#000';
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	// objects
-	var listFire = [];
-	var listFirework = [];
-	var fireNumber = 10;
-	var center = { x: canvas.width / 2, y: canvas.height / 2 };
-	var range = 100;
-	for (var i = 0; i < fireNumber; i++) {
-		var fire = {
-			x: Math.random() * range / 2 - range / 4 + center.x,
-			y: Math.random() * range * 2 + canvas.height,
-			size: Math.random() + 0.5,
-			fill: '#fd1',
-			vx: Math.random() - 0.5,
-			vy: -(Math.random() + 4),
-			ax: Math.random() * 0.02 - 0.01,
-			far: Math.random() * range + (center.y - range)
-		};
-		fire.base = {
-			x: fire.x,
-			y: fire.y,
-			vx: fire.vx
-		};
-		//
-		listFire.push(fire);
-	}
 
-	function randColor() {
-		var r = Math.floor(Math.random() * 256);
-		var g = Math.floor(Math.random() * 256);
-		var b = Math.floor(Math.random() * 256);
-		var color = 'rgb($r, $g, $b)';
-		color = color.replace('$r', r);
-		color = color.replace('$g', g);
-		color = color.replace('$b', b);
-		return color;
-	}
 
-	(function loop() {
-		requestAnimationFrame(loop);
-		update();
-		draw();
-	})();
+// The star of every good animation
+var requestAnimationFrame = window.requestAnimationFrame ||
+                            window.mozRequestAnimationFrame ||
+                            window.webkitRequestAnimationFrame ||
+                            window.msRequestAnimationFrame;
 
-	function update() {
-		for (var i = 0; i < listFire.length; i++) {
-			var fire = listFire[i];
-			//
-			if (fire.y <= fire.far) {
-				// case add firework
-				var color = randColor();
-				for (var i = 0; i < fireNumber * 5; i++) {
-					var firework = {
-						x: fire.x,
-						y: fire.y,
-						size: Math.random() + 1.5,
-						fill: color,
-						vx: Math.random() * 5 - 2.5,
-						vy: Math.random() * -5 + 1.5,
-						ay: 0.05,
-						alpha: 1,
-						life: Math.round(Math.random() * range / 2) + range / 2
-					};
-					firework.base = {
-						life: firework.life,
-						size: firework.size
-					};
-					listFirework.push(firework);
-				}
-				// reset
-				fire.y = fire.base.y;
-				fire.x = fire.base.x;
-				fire.vx = fire.base.vx;
-				fire.ax = Math.random() * 0.02 - 0.01;
-			}
-			//
-			fire.x += fire.vx;
-			fire.y += fire.vy;
-			fire.vx += fire.ax;
-		}
+var transforms = ["transform",
+                  "msTransform",
+                  "webkitTransform",
+                  "mozTransform",
+                  "oTransform"];
 
-		for (var i = listFirework.length - 1; i >= 0; i--) {
-			var firework = listFirework[i];
-			if (firework) {
-				firework.x += firework.vx;
-				firework.y += firework.vy;
-				firework.vy += firework.ay;
-				firework.alpha = firework.life / firework.base.life;
-				firework.size = firework.alpha * firework.base.size;
-				firework.alpha = firework.alpha > 0.6 ? 1 : firework.alpha;
-				//
-				firework.life--;
-				if (firework.life <= 0) {
-					listFirework.splice(i, 1);
-				}
-			}
-		}
-	}
+var transformProperty = getSupportedPropertyName(transforms);
 
-	function draw() {
-		// clear
-		ctx.globalCompositeOperation = 'source-over';
-		ctx.globalAlpha = 0.18;
-		ctx.fillStyle = '#000';
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
+// Array to store our Snowflake objects
+var snowflakes = [];
 
-		// re-draw
-		ctx.globalCompositeOperation = 'screen';
-		ctx.globalAlpha = 1;
-		for (var i = 0; i < listFire.length; i++) {
-			var fire = listFire[i];
-			ctx.beginPath();
-			ctx.arc(fire.x, fire.y, fire.size, 0, Math.PI * 2);
-			ctx.closePath();
-			ctx.fillStyle = fire.fill;
-			ctx.fill();
-		}
+// Global variables to store our browser's window size
+var browserWidth;
+var browserHeight;
 
-		for (var i = 0; i < listFirework.length; i++) {
-			var firework = listFirework[i];
-			ctx.globalAlpha = firework.alpha;
-			ctx.beginPath();
-			ctx.arc(firework.x, firework.y, firework.size, 0, Math.PI * 2);
-			ctx.closePath();
-			ctx.fillStyle = firework.fill;
-			ctx.fill();
-		}
-	}
-})
+// Specify the number of snowflakes you want visible
+var numberOfSnowflakes = 50;
+
+// Flag to reset the position of the snowflakes
+var resetPosition = false;
+
+//
+// It all starts here...
+//
+function setup() {
+    window.addEventListener("DOMContentLoaded", generateSnowflakes, false);
+    window.addEventListener("resize", setResetFlag, false);
+}
+setup();
+
+//
+// Vendor prefix management
+//
+function getSupportedPropertyName(properties) {
+    for (var i = 0; i < properties.length; i++) {
+        if (typeof document.body.style[properties[i]] != "undefined") {
+            return properties[i];
+        }
+    }
+    return null;
+}
+
+//
+// Constructor for our Snowflake object
+//
+function Snowflake(element, speed, xPos, yPos) {
+
+    // set initial snowflake properties
+    this.element = element;
+    this.speed = speed;
+    this.xPos = xPos;
+    this.yPos = yPos;
+
+    // declare variables used for snowflake's motion
+    this.counter = 0;
+    this.sign = Math.random() < 0.5 ? 1 : -1;
+
+    // setting an initial opacity and size for our snowflake
+    this.element.style.opacity = .1 + Math.random();
+    this.element.style.fontSize = 14 + Math.random() * 50 + "px";
+}
+
+//
+// The function responsible for actually moving our snowflake
+//
+Snowflake.prototype.update = function () {
+
+    // using some trigonometry to determine our x and y position
+    this.counter += this.speed / 5000;
+    this.xPos += this.sign * this.speed * Math.cos(this.counter) / 40;
+    this.yPos += Math.sin(this.counter) / 40 + this.speed / 30;
+
+    // setting our snowflake's position
+    setTranslate3DTransform(this.element, Math.round(this.xPos), Math.round(this.yPos));
+
+    // if snowflake goes below the browser window, move it back to the top
+    if (this.yPos > browserHeight) {
+        this.yPos = -50;
+    }
+}
+
+//
+// A performant way to set your snowflake's position
+//
+function setTranslate3DTransform(element, xPosition, yPosition) {
+    var val = "translate3d(" + xPosition + "px, " + yPosition + "px" + ", 0)";
+    element.style[transformProperty] = val;
+}
+
+//
+// The function responsible for creating the snowflake
+//
+function generateSnowflakes() {
+
+    // get our snowflake element from the DOM and store it
+    var originalSnowflake = document.querySelector(".snowflake");
+
+    // access our snowflake element's parent container
+    var snowflakeContainer = originalSnowflake.parentNode;
+
+    // get our browser's size
+    browserWidth = document.documentElement.clientWidth;
+    browserHeight = document.documentElement.clientHeight;
+
+    // create each individual snowflake
+    for (var i = 0; i < numberOfSnowflakes; i++) {
+
+        // clone our original snowflake and add it to snowflakeContainer
+        var snowflakeClone = originalSnowflake.cloneNode(true);
+        snowflakeContainer.appendChild(snowflakeClone);
+
+        // set our snowflake's initial position and related properties
+        var initialXPos = getPosition(50, browserWidth);
+        var initialYPos = getPosition(50, browserHeight);
+        var speed = 5+Math.random()*40;
+
+        // create our Snowflake object
+        var snowflakeObject = new Snowflake(snowflakeClone,
+                                            speed,
+                                            initialXPos,
+                                            initialYPos);
+        snowflakes.push(snowflakeObject);
+    }
+
+    // remove the original snowflake because we no longer need it visible
+    snowflakeContainer.removeChild(originalSnowflake);
+
+    // call the moveSnowflakes function every 30 milliseconds
+    moveSnowflakes();
+}
+
+//
+// Responsible for moving each snowflake by calling its update function
+//
+function moveSnowflakes() {
+    for (var i = 0; i < snowflakes.length; i++) {
+        var snowflake = snowflakes[i];
+        snowflake.update();
+    }
+
+    // Reset the position of all the snowflakes to a new value
+    if (resetPosition) {
+        browserWidth = document.documentElement.clientWidth;
+        browserHeight = document.documentElement.clientHeight;
+
+        for (var i = 0; i < snowflakes.length; i++) {
+            var snowflake = snowflakes[i];
+
+            snowflake.xPos = getPosition(50, browserWidth);
+            snowflake.yPos = getPosition(50, browserHeight);
+        }
+
+        resetPosition = false;
+    }
+
+    requestAnimationFrame(moveSnowflakes);
+}
+
+//
+// This function returns a number between (maximum - offset) and (maximum + offset)
+//
+function getPosition(offset, size) {
+    return Math.round(-1*offset + Math.random() * (size+2*offset));
+}
+
+//
+// Trigger a reset of all the snowflakes' positions
+//
+function setResetFlag(e) {
+    resetPosition = true;
+}
