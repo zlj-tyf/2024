@@ -14,10 +14,6 @@ body {
 }
 
 
-canvas {
-	display: block;
-}
-
 section {
   display:inline-block;width:100%;
 }
