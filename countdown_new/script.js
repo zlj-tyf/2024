@@ -6,20 +6,20 @@
 
   //I'm adding this section so I don't have to keep updating this pen every year :-)
   //remove this if you don't need it
-  let today = new Date(),
-      dd = String(today.getDate()).padStart(2, "0"),
-      mm = String(today.getMonth() + 1).padStart(2, "0"),
-      yyyy = today.getFullYear(),
-      nextYear = yyyy + 1,
-      dayMonth = "01/19/",
-      birthday = dayMonth + yyyy;
+  // let today = new Date(),
+  //     dd = String(today.getDate()).padStart(2, "0"),
+  //     mm = String(today.getMonth() + 1).padStart(2, "0"),
+  //     yyyy = today.getFullYear(),
+  //     nextYear = yyyy + 1,
+  //     dayMonth = "01/19/",
+  //     birthday = dayMonth + yyyy;
   
-  today = mm + "/" + dd + "/" + yyyy;
-  if (today > birthday) {
-    birthday = dayMonth + nextYear;
-  }
+  // today = mm + "/" + dd + "/" + yyyy;
+  // if (today > birthday) {
+  //   birthday = dayMonth + nextYear;
+  // }
   //end
-  
+  let birthday = "01/19/2024";
   const countDown = new Date(birthday).getTime(),
       x = setInterval(function() {    
 
